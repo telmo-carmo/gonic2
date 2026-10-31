@@ -27,22 +27,22 @@ func FindDepts(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": depts})
 }
 
-// GET /depts/:id
+// GET /depts/:deptno
 // Find a dept
 func FindDept(c *gin.Context) {
 	// Get model if exist
 	var dept dal.Dept
-	id := c.Param("id")
-	if err := dal.DB.NewSelect().Model(&dept).Where("id = ?", id).Scan(c.Request.Context()); err != nil {
+	deptno := c.Param("deptno")
+	if err := dal.DB.NewSelect().Model(&dept).Where("deptno = ?", deptno).Scan(c.Request.Context()); err != nil {
 		if err != sql.ErrNoRows {
-			log.Printf("[ERROR] get dept %s: %v", id, err)
+			log.Printf("[ERROR] get dept %s: %v", deptno, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record " + id + " not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record " + deptno + " not found!"})
 		return
 	}
-	log.Printf("[INFO] get dept %s", id)
+	log.Printf("[INFO] get dept %s", deptno)
 	c.JSON(http.StatusOK, gin.H{"data": dept})
 }
 
@@ -70,37 +70,37 @@ func CreateDept(c *gin.Context) {
 func DeleteDept(c *gin.Context) {
 	// Get model if exist
 	var dept dal.Dept
-	id := c.Param("id")
-	if err := dal.DB.NewSelect().Model(&dept).Where("id = ?", id).Scan(c.Request.Context()); err != nil {
+	deptno := c.Param("deptno")
+	if err := dal.DB.NewSelect().Model(&dept).Where("deptno = ?", deptno).Scan(c.Request.Context()); err != nil {
 		if err != sql.ErrNoRows {
-			log.Printf("[ERROR] get dept %s: %v", id, err)
+			log.Printf("[ERROR] get dept %s: %v", deptno, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record " + id + " not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record " + deptno + " not found!"})
 		return
 	}
 
-	if _, err := dal.DB.NewDelete().Model(&dept).Where("id = ?", id).Exec(c.Request.Context()); err != nil {
-		log.Printf("[ERROR] delete dept %s: %v", id, err)
+	if _, err := dal.DB.NewDelete().Model(&dept).WherePK().Exec(c.Request.Context()); err != nil {
+		log.Printf("[ERROR] delete dept %s: %v", deptno, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("[INFO] delete dept %s", id)
+	log.Printf("[INFO] delete dept %s", deptno)
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }
 
 func UpdateDept(c *gin.Context) {
 	// Get model if exist
 	var dept dal.Dept
-	id := c.Param("id")
-	if err := dal.DB.NewSelect().Model(&dept).Where("id = ?", id).Scan(c.Request.Context()); err != nil {
+	deptno := c.Param("deptno")
+	if err := dal.DB.NewSelect().Model(&dept).Where("deptno = ?", deptno).Scan(c.Request.Context()); err != nil {
 		if err != sql.ErrNoRows {
-			log.Printf("[ERROR] get dept %s: %v", id, err)
+			log.Printf("[ERROR] get dept %s: %v", deptno, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record " + id + " not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record " + deptno + " not found!"})
 		return
 	}
 
@@ -113,11 +113,11 @@ func UpdateDept(c *gin.Context) {
 
 	dept.Dname = input.Name
 
-	if _, err := dal.DB.NewUpdate().Model(&dept).Where("id = ?", id).Exec(c.Request.Context()); err != nil {
-		log.Printf("[ERROR] update dept %s: %v", id, err)
+	if _, err := dal.DB.NewUpdate().Model(&dept).WherePK().Column("dname").Exec(c.Request.Context()); err != nil {
+		log.Printf("[ERROR] update dept %s: %v", deptno, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("[INFO] update dept %s", id)
+	log.Printf("[INFO] update dept %s", deptno)
 	c.JSON(http.StatusOK, gin.H{"data": dept})
 }

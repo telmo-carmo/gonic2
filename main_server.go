@@ -271,10 +271,10 @@ func main() {
 	rv2 := r.Group("/api/depts")
 	{
 		rv2.GET("/", controllers.FindDepts)
-		rv2.GET("/:id", controllers.FindDept)
+		rv2.GET("/:deptno", controllers.FindDept)
 		rv2.POST("/", controllers.CreateDept)
-		rv2.PUT("/:id", controllers.UpdateDept)
-		rv2.DELETE("/:id", controllers.DeleteDept)
+		rv2.PUT("/:deptno", controllers.UpdateDept)
+		rv2.DELETE("/:deptno", controllers.DeleteDept)
 	}
 
 	log.Printf("Running on  %s", *addrP)

@@ -36,7 +36,9 @@ type Bonus struct {
 }
 
 type Dept struct {
-	Deptno int    `json:"deptno"`
+	bun.BaseModel `bun:"table:dept"`
+
+	Deptno int    `json:"deptno" bun:"DEPTNO,pk"`
 	Dname  string `json:"dname"`
 	Loc    string `json:"loc"`
 }
