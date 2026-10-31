@@ -10,8 +10,9 @@ import (
 )
 
 type deptInput struct {
-	Name string `json:"name" binding:"required"`
-	Loc  string `json:"loc" binding:"required"`
+	Deptno int    `json:"deptno" binding:"required"`
+	Name   string `json:"name" binding:"required"`
+	Loc    string `json:"loc" binding:"required"`
 }
 
 // GET /depts
@@ -57,13 +58,13 @@ func CreateDept(c *gin.Context) {
 	}
 
 	// Create dept
-	dept := dal.Dept{Dname: input.Name, Loc: input.Loc}
+	dept := dal.Dept{Name: input.Name, Loc: input.Loc}
 	if _, err := dal.DB.NewInsert().Model(&dept).Exec(c.Request.Context()); err != nil {
 		log.Printf("[ERROR] create dept: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("[INFO] create dept %s", dept.Dname)
+	log.Printf("[INFO] create dept %d", dept.Deptno)
 	c.JSON(http.StatusOK, gin.H{"data": dept})
 }
 
@@ -111,9 +112,10 @@ func UpdateDept(c *gin.Context) {
 		return
 	}
 
-	dept.Dname = input.Name
+	dept.Name = input.Name
+	dept.Loc = input.Loc
 
-	if _, err := dal.DB.NewUpdate().Model(&dept).WherePK().Column("dname").Exec(c.Request.Context()); err != nil {
+	if _, err := dal.DB.NewUpdate().Model(&dept).WherePK().Column("name").Column("loc").Exec(c.Request.Context()); err != nil {
 		log.Printf("[ERROR] update dept %s: %v", deptno, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
