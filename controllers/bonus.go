@@ -9,34 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetAllDepts(c *gin.Context) {
-	myDb := dal.DB.DB
-
-	log.Print("[INFO] GetAllDepts ")
-	rows, err := myDb.Query("SELECT deptno,dname,loc,versionno,active FROM dept")
-	if err != nil {
-		log.Printf("[WARN] Query rows error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	myItems := []dal.Dept{}
-
-	for rows.Next() {
-		var item dal.Dept
-		rows.Scan(&item.Deptno, &item.Dname, &item.Loc, &item.VersionNo, &item.Active)
-		log.Printf("[INFO] Dept:%v\n", item)
-		myItems = append(myItems, item)
-	}
-	rows.Close()
-
-	if err = rows.Err(); err != nil {
-		log.Printf("[WARN] Query rows error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": myItems})
-}
-
 func GetAllBonus(c *gin.Context) {
 	myDb := dal.DB.DB
 

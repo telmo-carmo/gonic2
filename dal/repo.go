@@ -36,9 +36,9 @@ type Bonus struct {
 }
 
 type Dept struct {
-	Deptno    int    `json:"deptno"`
-	Dname     string `json:"dname"`
-	Loc       string `json:"loc"`
+	Deptno int    `json:"deptno"`
+	Dname  string `json:"dname"`
+	Loc    string `json:"loc"`
 }
 
 var DB *bun.DB
@@ -59,15 +59,6 @@ func InitDatabase() error {
 		return fmt.Errorf("create book table: %w", err)
 	}
 
-	/*
-		// Create
-		db.NewInsert().Model(&Product{Code: "D42", Price: 100}).Exec(context.Background())
-		//db.NewInsert().Model(&Book{Title: "Dune", Author: "John Adams"}).Exec(context.Background())
-
-		// Read
-		var product Product
-		db.NewSelect().Model(&product).Where("id = ?", 1).Scan(context.Background())
-	*/
 	DB = db
 	return nil
 }

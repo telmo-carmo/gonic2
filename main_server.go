@@ -268,6 +268,14 @@ func main() {
 		rv1p.PUT("/bonus/:id", controllers.UpdateBonus)
 		rv1p.DELETE("/bonus/:id", controllers.DeleteBonus)
 	}
+	rv2 := r.Group("/api/depts")
+	{
+		rv2.GET("/", controllers.FindDepts)
+		rv2.GET("/:id", controllers.FindDept)
+		rv2.POST("/", controllers.CreateDept)
+		rv2.PUT("/:id", controllers.UpdateDept)
+		rv2.DELETE("/:id", controllers.DeleteDept)
+	}
 
 	log.Printf("Running on  %s", *addrP)
 

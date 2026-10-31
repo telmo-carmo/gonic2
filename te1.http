@@ -92,3 +92,11 @@ GET {{host1}}/auth/rnd
 Authorization: {{jwt}}
 
 ###
+
+GET {{host1}}/api/depts
+
+###
+GET {{host1}}/api/depts/10
+Accept: application/json
+
+###
