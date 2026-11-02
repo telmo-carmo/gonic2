@@ -309,8 +309,10 @@ func main() {
 		rv2.DELETE("/:deptno", controllers.DeleteDept)
 	}
 
-	r.GET("/report1", controllers.Report1Handler)
+	r.GET("/report1", controllers.Report1Handler) // rpt PDF
 	r.POST("/report1", controllers.Report1Handler)
+
+	r.GET("/report2", controllers.Report2Handler) // rpt Excel
 
 	log.Info().Msgf("Running on  %s", *addrP)
 
