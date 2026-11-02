@@ -10,7 +10,7 @@ import (
 )
 
 func Report2Handler(c *gin.Context) {
-	// 1. Initialize a clean excelize file instance
+	// Initialize a clean excelize file instance
 	f := excelize.NewFile()
 	defer func() {
 		if err := f.Close(); err != nil {
@@ -27,10 +27,10 @@ func Report2Handler(c *gin.Context) {
 		{1, "Premium Microservice Framework", 199.99, time.Now().Format("2006-01-02")},
 		{2, "Go 1.26 Performance Tuning Guide", 49.50, time.Now().Format("2006-01-02")},
 		{3, "Automated Cloud Sync Engine", 1250.00, "2026-03-02"},
-		{4, "Next-Gen AI Toolkit", 13299.10, "2016-04-02"},
+		{4, "Next-Gen AI Toolkit", 3299.10, "2016-04-02"},
 	}
 
-	//  Write Headers
+	//  Write Col Headers
 	for colNum, header := range headers {
 		cell, _ := excelize.CoordinatesToCellName(colNum+1, 1)
 		f.SetCellValue(sheetName, cell, header)
