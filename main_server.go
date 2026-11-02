@@ -309,6 +309,9 @@ func main() {
 		rv2.DELETE("/:deptno", controllers.DeleteDept)
 	}
 
+	r.GET("/report1", controllers.Report1Handler)
+	r.POST("/report1", controllers.Report1Handler)
+
 	log.Info().Msgf("Running on  %s", *addrP)
 
 	r.Run(*addrP)

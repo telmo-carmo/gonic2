@@ -102,3 +102,25 @@ GET {{host1}}/health
 ###
 GET {{host1}}/echo?name=Poe
 ###
+
+POST {{host1}}/report1
+Content-Type: application/json
+
+{
+  "title": "Customer Report",
+  "customers": [
+    {
+      "id": 2001,
+      "name": "João Simões",
+      "country": "Portugal",
+      "balance": 15000.50
+    },
+    {
+      "id": 2002,
+      "name": "Mariana Lopez",
+      "country": "Spain",
+      "balance": 8123.75
+    }
+  ]
+}
+###
