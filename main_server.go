@@ -194,6 +194,8 @@ func main() {
 			log.DefaultLogger.Level = log.InfoLevel
 		}
 	}
+	log.Info().Msg("Using Log Level: " + log.DefaultLogger.Level.String())
+
 	log.DefaultLogger = log.Logger{
 		//Level:      log.InfoLevel,
 		Caller:     1,
