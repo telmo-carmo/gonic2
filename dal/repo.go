@@ -39,9 +39,9 @@ type Bonus struct {
 type Dept struct {
 	bun.BaseModel `bun:"table:dept"`
 
-	Deptno int    `json:"deptno" bun:"deptno,pk"`
-	Name   string `json:"name"   bun:"name,notnull"`
-	Loc    string `json:"loc"    bun:"loc,notnull"`
+	Deptno int    `json:"deptno" bun:"DEPTNO,pk"`
+	Name   string `json:"name"   bun:"NAME,notnull"`
+	Loc    string `json:"loc"    bun:"LOC,notnull"`
 }
 
 var DB *bun.DB
