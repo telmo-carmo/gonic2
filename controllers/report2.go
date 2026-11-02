@@ -26,7 +26,8 @@ func Report2Handler(c *gin.Context) {
 	rows := [][]interface{}{
 		{1, "Premium Microservice Framework", 199.99, time.Now().Format("2006-01-02")},
 		{2, "Go 1.26 Performance Tuning Guide", 49.50, time.Now().Format("2006-01-02")},
-		{3, "Automated Cloud Sync Engine", 1250.00, time.Now().Format("2006-01-02")},
+		{3, "Automated Cloud Sync Engine", 1250.00, "2026-03-02"},
+		{4, "Next-Gen AI Toolkit", 13299.10, "2016-04-02"},
 	}
 
 	//  Write Headers
@@ -43,6 +44,8 @@ func Report2Handler(c *gin.Context) {
 			f.SetCellValue(sheetName, cell, value)
 		}
 	}
+	// generate in row 5 , col 3 a sum of previous prices
+	f.SetCellFormula(sheetName, "C6", "SUM(C2:C5)")
 
 	// Configure Content Headers for HTTP dynamic downloading
 	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
