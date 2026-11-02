@@ -10,5 +10,6 @@ upd:
 	go mod tidy
 
 clean:
-	rm gonic2
 	@rm gonic2.exe
+	rm gonic2
+

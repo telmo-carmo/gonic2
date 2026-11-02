@@ -2,8 +2,6 @@
 @host1 = http://localhost:5000
 @jwt = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnb25pYzEiLCJzdWIiOiJkZW1vIiwiZXhwIjoxNzkzNjM3ODIyLCJpYXQiOjE3OTM2MjM0MjIsImp0aSI6IjEifQ.zHw-meH1Fjf88p5eqOfv-R_uz3bFvWf7ExpvLYYsHJs
 
-
-
 ###
 GET {{host1}}/api/books HTTP/1.1
 
