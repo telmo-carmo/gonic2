@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
+	"os"
 	"time"
 
+	"github.com/phuslu/log"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
@@ -39,7 +40,7 @@ type Dept struct {
 	bun.BaseModel `bun:"table:dept"`
 
 	Deptno int    `json:"deptno" bun:"deptno,pk"`
-	Name   string `json:"name"    bun:"name,notnull"`
+	Name   string `json:"name"   bun:"name,notnull"`
 	Loc    string `json:"loc"    bun:"loc,notnull"`
 }
 
@@ -47,15 +48,18 @@ var DB *bun.DB
 
 // InitDatabase initializes the database and creates the application schema.
 func InitDatabase() error {
-	dbname := "gonic2.db"
+	dbname := os.Getenv("DB_CONNECTION")
+	if dbname == "" {
+		dbname = "gonic2.db"
+	}
 	sqldb, err := sql.Open(sqliteshim.ShimName, dbname)
 	if err != nil {
 		return fmt.Errorf("open database %q: %w", dbname, err)
 	}
 	db := bun.NewDB(sqldb, sqlitedialect.New())
-	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
+	db.WithQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
 
-	log.Printf("[INFO] using db: %s", dbname)
+	log.Info().Msgf("using db: %s", dbname)
 	if _, err := db.NewCreateTable().Model((*Book)(nil)).IfNotExists().Exec(context.Background()); err != nil {
 		db.Close()
 		return fmt.Errorf("create book table: %w", err)

@@ -2,20 +2,20 @@ package controllers
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"tac/gonic2/dal"
 
 	"github.com/gin-gonic/gin"
+	"github.com/phuslu/log"
 )
 
 func GetAllBonus(c *gin.Context) {
 	myDb := dal.DB.DB
 
-	log.Printf("[INFO] GetAllBonus ")
+	log.Info().Msg("GetAllBonus")
 	rows, err := myDb.Query("SELECT ename, job, sal, comm  FROM bonus")
 	if err != nil {
-		log.Printf("[WARN] Query error: %v", err)
+		log.Warn().Err(err).Msg("Query error")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -24,13 +24,13 @@ func GetAllBonus(c *gin.Context) {
 	for rows.Next() {
 		var tempBn dal.Bonus
 		rows.Scan(&tempBn.Ename, &tempBn.Job, &tempBn.Sal, &tempBn.Comm)
-		log.Printf("[INFO] Ename:%s, Job:%s, Sal:%d\n", tempBn.Ename, tempBn.Job, tempBn.Sal)
+		log.Info().Msgf("Ename:%s, Job:%s, Sal:%d", tempBn.Ename, tempBn.Job, tempBn.Sal)
 		myBonus = append(myBonus, tempBn)
 	}
 	rows.Close()
 
 	if err = rows.Err(); err != nil {
-		log.Printf("[WARN] Query rows error: %v", err)
+		log.Warn().Err(err).Msg("Query rows error")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -41,7 +41,7 @@ func GetOneBonus(c *gin.Context) {
 	myDb := dal.DB.DB
 	id := c.Params.ByName("id") // c.Param("id")
 	uid := c.GetString("uid")
-	log.Printf("[INFO] GetOneBonus id: %s (%s)", id, uid)
+	log.Info().Msgf("GetOneBonus id: %s (%s)", id, uid)
 
 	var tempBn dal.Bonus
 	err := myDb.QueryRow("SELECT ename, job, sal,comm FROM bonus where ename = ?", id).Scan(&tempBn.Ename, &tempBn.Job, &tempBn.Sal, &tempBn.Comm)
@@ -50,11 +50,11 @@ func GetOneBonus(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 			return
 		}
-		log.Printf("[WARN] Query row error: %v", err)
+		log.Warn().Err(err).Msg("Query row error")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	} else {
-		log.Printf("[INFO] Ename:%s, Job:%s, Sal:%d\n", tempBn.Ename, tempBn.Job, tempBn.Sal)
+		log.Info().Msgf("Ename:%s, Job:%s, Sal:%d", tempBn.Ename, tempBn.Job, tempBn.Sal)
 	}
 	c.JSON(http.StatusOK, tempBn)
 }
@@ -69,7 +69,7 @@ func CreateBonus(c *gin.Context) {
 	myDb := dal.DB.DB
 	_, err := myDb.Exec("INSERT INTO bonus (ename, job, sal,comm) VALUES (?,?,?,?)", bn.Ename, bn.Job, bn.Sal, bn.Comm)
 	if err != nil {
-		log.Printf("[ERROR] err insert %v", err)
+		log.Error().Err(err).Msg("insert bonus")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -91,7 +91,7 @@ func UpdateBonus(c *gin.Context) {
 	myDb := dal.DB.DB
 	_, err := myDb.Exec("UPDATE bonus SET job=?, sal=?,comm=?  WHERE ename = ?", bn.Job, bn.Sal, bn.Comm, bn.Ename)
 	if err != nil {
-		log.Printf("err %v", err)
+		log.Error().Err(err).Msg("update bonus")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -100,7 +100,7 @@ func UpdateBonus(c *gin.Context) {
 
 func DeleteBonus(c *gin.Context) {
 	id := c.Params.ByName("id")
-	log.Printf("delete %s", id)
+	log.Info().Msgf("delete %s", id)
 	myDb := dal.DB.DB
 	var bn dal.Bonus
 	err := myDb.QueryRow("SELECT ename, job, sal,comm FROM bonus where ename = ?", id).Scan(&bn.Ename, &bn.Job, &bn.Sal, &bn.Comm)
@@ -109,16 +109,16 @@ func DeleteBonus(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 			return
 		}
-		log.Printf("[WARN] Query row error: %v", err)
+		log.Warn().Err(err).Msg("Query row error")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	} else {
-		log.Printf("[INFO] Ename:%s, Job:%s, Sal:%d\n", bn.Ename, bn.Job, bn.Sal)
+		log.Info().Msgf("Ename:%s, Job:%s, Sal:%d", bn.Ename, bn.Job, bn.Sal)
 	}
 
 	_, err = myDb.Exec("DELETE FROM  bonus  WHERE ename = ?", bn.Ename)
 	if err != nil {
-		log.Printf("delete err %v", err)
+		log.Error().Err(err).Msg("delete bonus")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

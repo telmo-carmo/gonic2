@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"tac/gonic2/dal"
 
 	"github.com/gin-gonic/gin"
+	"github.com/phuslu/log"
 )
 
 type bookInput struct {
@@ -19,11 +19,11 @@ type bookInput struct {
 func FindBooks(c *gin.Context) {
 	var books []dal.Book
 	if err := dal.DB.NewSelect().Model(&books).Scan(c.Request.Context()); err != nil {
-		log.Printf("[ERROR] get books: %v", err)
+		log.Error().Err(err).Msg("get books")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("[INFO] get all books #%d", len(books))
+	log.Info().Msgf("get all books #%d", len(books))
 	c.JSON(http.StatusOK, gin.H{"data": books})
 }
 
@@ -35,14 +35,14 @@ func FindBook(c *gin.Context) {
 	id := c.Param("id")
 	if err := dal.DB.NewSelect().Model(&book).Where("id = ?", id).Scan(c.Request.Context()); err != nil {
 		if err != sql.ErrNoRows {
-			log.Printf("[ERROR] get book %s: %v", id, err)
+			log.Error().Err(err).Msgf("get book %s", id)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record " + id + " not found!"})
 		return
 	}
-	log.Printf("[INFO] get book %s", id)
+	log.Info().Msgf("get book %s", id)
 	c.JSON(http.StatusOK, gin.H{"data": book})
 }
 
@@ -59,11 +59,11 @@ func CreateBook(c *gin.Context) {
 	// Create book
 	book := dal.Book{Title: input.Title, Author: input.Author}
 	if _, err := dal.DB.NewInsert().Model(&book).Exec(c.Request.Context()); err != nil {
-		log.Printf("[ERROR] create book: %v", err)
+		log.Error().Err(err).Msg("create book")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("[INFO] created book '%v'", book)
+	log.Info().Msgf("created book '%v'", book)
 	c.JSON(http.StatusOK, gin.H{"data": book})
 }
 
@@ -75,7 +75,7 @@ func UpdateBook(c *gin.Context) {
 	id := c.Param("id")
 	if err := dal.DB.NewSelect().Model(&book).Where("id = ?", id).Scan(c.Request.Context()); err != nil {
 		if err != sql.ErrNoRows {
-			log.Printf("[ERROR] get book %s for update: %v", id, err)
+			log.Error().Err(err).Msgf("get book %s for update", id)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -91,9 +91,9 @@ func UpdateBook(c *gin.Context) {
 	}
 	book.Title = input.Title
 	book.Author = input.Author
-	log.Printf("[INFO] updating book '%v'", book)
+	log.Info().Msgf("updating book '%v'", book)
 	if _, err := dal.DB.NewUpdate().Model(&book).WherePK().Column("title", "author").Exec(c.Request.Context()); err != nil {
-		log.Printf("[ERROR] update book %s: %v", id, err)
+		log.Error().Err(err).Msgf("update book %s", id)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -109,16 +109,16 @@ func DeleteBook(c *gin.Context) {
 	id := c.Param("id")
 	if err := dal.DB.NewSelect().Model(&book).Where("id = ?", id).Scan(c.Request.Context()); err != nil {
 		if err != sql.ErrNoRows {
-			log.Printf("[ERROR] get book %s for delete: %v", id, err)
+			log.Error().Err(err).Msgf("get book %s for delete", id)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
-	log.Printf("[INFO] deleting book '%v'", book)
+	log.Info().Msgf("deleting book '%v'", book)
 	if _, err := dal.DB.NewDelete().Model(&book).WherePK().Exec(c.Request.Context()); err != nil {
-		log.Printf("[ERROR] delete book %s: %v", id, err)
+		log.Error().Err(err).Msgf("delete book %s", id)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

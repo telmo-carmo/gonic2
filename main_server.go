@@ -24,7 +24,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -33,8 +32,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/phuslu/log"
 
 	"tac/gonic2/controllers"
 	"tac/gonic2/dal"
@@ -92,19 +94,19 @@ func loginApi(c *gin.Context) {
 		return
 	}
 
-	log.Printf("[INFO] Login token= Authorization: Bearer %s", stoken)
+	log.Info().Msgf("Login token= Authorization: Bearer %s", stoken)
 	c.JSON(http.StatusOK, gin.H{"username": u.Username, "token": "Bearer " + stoken})
 }
 
 func logoutApi(c *gin.Context) {
-	log.Println("[INFO] LOGOUT!")
+	log.Info().Msg("LOGOUT!")
 	c.JSON(http.StatusOK, gin.H{"data": "logout!"})
 }
 
 func rndApi(c *gin.Context) {
 	rn := time.Now().UnixNano()
 	uid, _ := c.Get("uid")
-	log.Printf("[INFO] auth rnd: %d uid: %v", rn, uid)
+	log.Info().Msgf("auth rnd: %d uid: %v", rn, uid)
 	c.JSON(http.StatusOK, gin.H{"rnd": rn})
 }
 
@@ -132,30 +134,29 @@ func TokenValid(c *gin.Context) error {
 		return []byte(jwt_secret), nil
 	})
 	if token == nil || token.Valid == false {
-		log.Println("[ERROR] auth header not valid token", err)
+		log.Error().Err(err).Msg("auth header not valid token")
 		return ErrBadAuth
 	}
 	uIdName := "0;NA"
 
 	if claims, ok := token.Claims.(jwt.MapClaims); !ok {
-		log.Println("[ERROR] bad auth header token", err)
+		log.Error().Err(err).Msg("bad auth header token")
 		return ErrBadAuth
 	} else {
 		expTime, err := claims.GetExpirationTime()
 		if err != nil {
 			return fmt.Errorf("Failed to parse token expiration claim")
 		}
-		log.Printf("[WARN] JWT Claims: %+v ; expiresAt: %s",
+		log.Warn().Msgf("JWT Claims: %+v ; expiresAt: %s",
 			claims,
 			expTime.Time.Format("2006-01-02T15:04:05.999Z")) // .Format(time.RFC3339))
 
 		uIdName = fmt.Sprintf("%s;%s", claims["jti"], claims["sub"])
 		c.Set("uid", uIdName)
-		//log.Printf("[WARN] JWT Claims: %v", claims)
 		//uIdName = claims.ID + ";" + claims.Subject + ";exp:" + claims.ExpiresAt.String()
 	}
 
-	log.Printf("[INFO] Auth header token OK for: %s", uIdName)
+	log.Info().Msgf("Auth header token OK for: %s", uIdName)
 	return nil
 }
 
@@ -175,6 +176,32 @@ func spa_handler(c *gin.Context) {
 }
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Error().Msg("Error loading .env file")
+	}
+	// get log level from env "GO_LOG"
+	if logLevel, ok := os.LookupEnv("GO_LOG"); ok {
+		switch strings.ToLower(logLevel) {
+		case "debug":
+			log.DefaultLogger.Level = log.DebugLevel
+		case "warn":
+			log.DefaultLogger.Level = log.WarnLevel
+		case "error":
+			log.DefaultLogger.Level = log.ErrorLevel
+		case "fatal":
+			log.DefaultLogger.Level = log.FatalLevel
+		default:
+			log.DefaultLogger.Level = log.InfoLevel
+		}
+	}
+	log.DefaultLogger = log.Logger{
+		//Level:      log.InfoLevel,
+		Caller:     1,
+		TimeField:  "date",
+		TimeFormat: "2006-01-02 15:04:05.000",
+		Writer:     &log.IOWriter{os.Stdout},
+	}
+
 	addrP := flag.String("addr", "0.0.0.0:5000", "server address")
 	coloredP := flag.Bool("color", false, "show colored logging")
 	flag.Parse()
@@ -188,7 +215,7 @@ func main() {
 	r := gin.Default()
 
 	if err := dal.InitDatabase(); err != nil {
-		log.Fatalf("initialize database: %v", err)
+		log.Fatal().Err(err).Msg("initialize database")
 	}
 
 	// Serve SPA frontend static files
@@ -207,7 +234,7 @@ func main() {
 
 	r.GET("/health", func(c *gin.Context) {
 		gv := fmt.Sprintf("go version %s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH)
-		log.Printf("[INFO] /health %s ", gv)
+		log.Info().Msgf("/health %s", gv)
 		c.JSON(http.StatusOK, gin.H{"status": "UP", "now": time.Now().Format("2006-01-02T15:04:05.999Z"), "GO": gv})
 	})
 	r.GET("/ping", func(c *gin.Context) {
@@ -218,7 +245,7 @@ func main() {
 	})
 	r.GET("/echo/:name", func(c *gin.Context) {
 		name := c.Param("name")
-		log.Printf("[INFO] %s ; echo %s", c.Request.URL, name)
+		log.Info().Msgf("%s ; echo %s", c.Request.URL, name)
 		c.String(http.StatusOK, "Hello %s", name)
 	})
 	r.GET("/upload", func(c *gin.Context) {
@@ -234,7 +261,7 @@ func main() {
 			c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
 			return
 		}
-		log.Printf("[INFO] Uploading %s from %s", name, file.Filename)
+		log.Info().Msgf("Uploading %s from %s", name, file.Filename)
 
 		filename := filepath.Base(file.Filename)
 		if err := c.SaveUploadedFile(file, filepath.Join("updocs", filename)); err != nil {
@@ -277,7 +304,7 @@ func main() {
 		rv2.DELETE("/:deptno", controllers.DeleteDept)
 	}
 
-	log.Printf("Running on  %s", *addrP)
+	log.Info().Msgf("Running on  %s", *addrP)
 
 	r.Run(*addrP)
 }
