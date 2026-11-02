@@ -235,19 +235,22 @@ func main() {
 	r.GET("/health", func(c *gin.Context) {
 		gv := fmt.Sprintf("go version %s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH)
 		log.Info().Msgf("/health %s", gv)
-		c.JSON(http.StatusOK, gin.H{"status": "UP", "now": time.Now().Format("2006-01-02T15:04:05.999Z"), "GO": gv})
-	})
-	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-			"now":     time.Now().UTC(),
+			"status": "UP",
+			"now":    time.Now().Format("2006-01-02T15:04:05.999Z"),
+			"GO":     gv,
 		})
 	})
-	r.GET("/echo/:name", func(c *gin.Context) {
+	echoHandler := func(c *gin.Context) {
 		name := c.Param("name")
+		if name == "" {
+			name = c.Query("name")
+		}
 		log.Info().Msgf("%s ; echo %s", c.Request.URL, name)
 		c.String(http.StatusOK, "Hello %s", name)
-	})
+	}
+	r.GET("/echo/:name", echoHandler)
+	r.GET("/echo", echoHandler)
 	r.GET("/upload", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "upload.html", gin.H{
 			"title": "Upload Some Doc",

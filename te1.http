@@ -100,3 +100,7 @@ GET {{host1}}/api/depts/10
 Accept: application/json
 
 ###
+GET {{host1}}/health
+###
+GET {{host1}}/echo?name=Poe
+###
