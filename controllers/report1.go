@@ -41,13 +41,13 @@ func Report1Handler(c *gin.Context) {
   "customers": [
     {
       "id": 1001,
-      "name": "John Smith",
+      "name": "João Simões",
       "country": "Portugal",
       "balance": 220.50
     },
     {
       "id": 1002,
-      "name": "Maria Silva",
+      "name": "Maria Nuñez",
       "country": "Spain",
       "balance": 8920.75
     }
