@@ -18,7 +18,11 @@ COPY . .
 # Build a statically linked binary
 # CGO_ENABLED=0 ensures no dynamic C libraries are required at runtime
 # -ldflags="-s -w" strips debug symbols to minimize binary size
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /app/server .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/server .
+
+# Create the uploads directory and assign ownership to distroless nonroot (65532:65532)
+RUN mkdir -p /out/updocs && chown -R 65532:65532 /out/updocs
+
 
 # --- Runtime Stage ---
 FROM gcr.io/distroless/static-debian12:nonroot
@@ -28,9 +32,12 @@ ENV GIN_MODE=release
 WORKDIR /app
 
 # Copy the compiled binary and assets from the builder stage
-COPY --from=builder /app/server /app/server
+COPY --from=builder /out/server /app/server
 COPY --from=builder /src/public /app/public
 COPY --from=builder /src/templates /app/templates
+
+# Copy the pre-created writable uploads directory
+COPY --from=builder --chown=nonroot:nonroot /out/updocs /app/updocs
 
 # Document the default port Gin listens on
 EXPOSE 8080
