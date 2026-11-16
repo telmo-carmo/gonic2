@@ -25,9 +25,12 @@ FROM gcr.io/distroless/static-debian12:nonroot
 
 # Set Gin to release mode to disable debug logging and improve performance
 ENV GIN_MODE=release
+WORKDIR /app
 
-# Copy the compiled binary from the builder stage
-COPY --from=builder /app/server /server
+# Copy the compiled binary and assets from the builder stage
+COPY --from=builder /app/server /app/server
+COPY --from=builder /src/public /app/public
+COPY --from=builder /src/templates /app/templates
 
 # Document the default port Gin listens on
 EXPOSE 8080
@@ -35,5 +38,5 @@ EXPOSE 8080
 # Run as the non-root user provided by distroless
 USER nonroot:nonroot
 
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/app/server"]
 
