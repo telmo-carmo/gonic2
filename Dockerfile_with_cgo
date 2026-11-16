@@ -1,0 +1,52 @@
+
+# syntax=docker/dockerfile:1
+
+# --- Build Stage ---
+# Use Debian (bookworm) instead of Alpine so glibc versions match distroless-debian12
+FROM golang:1.27-bookworm AS builder
+
+# Install gcc and standard C headers required by go-sqlite3
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+# Download dependencies first
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code, templates, and static assets
+COPY . .
+
+# Build with CGO_ENABLED=1 for mattn/go-sqlite3
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o /out/server ./cmd/api
+
+# Create writable directories for uploads and the SQLite database file
+RUN mkdir -p /out/uploads /out/data && chown -R 65532:65532 /out/uploads /out/data
+
+# --- Runtime Stage ---
+# base-debian12 includes glibc (required by CGO), unlike static-debian12
+FROM gcr.io/distroless/base-debian12:nonroot
+
+ENV GIN_MODE=release
+
+WORKDIR /app
+
+# Copy binary and read-only assets
+COPY --from=builder /out/server /app/server
+COPY --from=builder /src/templates /app/templates
+COPY --from=builder /src/static /app/static
+
+# Copy writable directories for uploads and SQLite DB storage
+COPY --from=builder --chown=nonroot:nonroot /out/uploads /app/uploads
+COPY --from=builder --chown=nonroot:nonroot /out/data /app/data
+
+EXPOSE 8080
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/app/server"]
+
+
